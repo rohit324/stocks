@@ -1,6 +1,7 @@
 
 import React from 'react';
 import Table from 'react-bootstrap/Table';
+import Button from 'react-bootstrap/Button';
 import Positions from './Positions';
 import Constants from './Constants';
 import Orders from './Orders';
@@ -172,7 +173,6 @@ class TestTable extends React.Component {
           <td>PNL</td>
           <td>Buy Avg</td>
           <td>Sell Avg</td>
-          <td>Remove</td>
         </tr>
       </thead>
       <tbody>
@@ -208,8 +208,8 @@ class TestTable extends React.Component {
           <td><input name="startRange" onChange={this.setStartRange} value={this.state.startRange} /></td>
           <td>Enter End Range</td>
           <td><input name="endRange" onChange={this.setEndRange} value={this.state.endRange} /></td>
-          <td><button name="endRange" onClick={this.displayPNLData} >Show Projections</button></td>
-          <td><button name="sampleFetch" onClick={this.getOpenPositions} >Sample fetch</button></td>
+          <td><Button name="endRange" onClick={this.displayPNLData} variant="secondary" size='md'>Show Projections</Button></td>
+          <td><Button name="sampleFetch" onClick={this.getOpenPositions} variant="secondary" size='md'>Sample fetch</Button></td>
         </tr>
       </tbody>
     </Table>;
@@ -328,9 +328,9 @@ class TestTable extends React.Component {
       <td>{Positions.getPNL(data[index])}</td>
       <td>{data[index]['actual_average_buy_price']}</td>
       <td>{data[index]['actual_average_sell_price']}</td>
-      <td><button name={data[index].token} onClick={this.deleteRow}> Delete Row </button></td>
-      <td><button name={data[index].token} onClick={() => this.sell(data[index])}> Sell </button></td>
-      <td><button name={data[index]} onClick={() => this.buy(data[index])}> Buy </button></td>
+      <td><Button name={data[index].token} onClick={this.deleteRow} variant="outline-danger" size='sm'> Delete</Button></td>
+      <td><Button name={data[index].token} onClick={() => this.sell(data[index])} variant="outline-info" size='sm'> Sell </Button></td>
+      <td><Button name={data[index]} onClick={() => this.buy(data[index])} variant="outline-info" size='sm'> Buy </Button></td>
     </tr>
   }
 
