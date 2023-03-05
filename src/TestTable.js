@@ -220,7 +220,7 @@ class TestTable extends React.Component {
     }
     const requestOptions = {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json', 'X-Authorization-Token': this.accessToken }
+      headers: { 'Content-Type': 'application/json', 'X-Authorization-Token': Constants.accessToken }
   };
     fetch('https://alpha.sasonline.in/api/v1/positions?client_id=RA108&type=historical', requestOptions)
     .then(response => response.json())
