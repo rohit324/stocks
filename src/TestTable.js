@@ -1,6 +1,8 @@
+
 import React from 'react';
 import Table from 'react-bootstrap/Table';
 import Positions from './Positions';
+import Constants from './Constants';
 class TestTable extends React.Component {
 
   defaultFilter = 'MAY';
@@ -174,12 +176,17 @@ class TestTable extends React.Component {
     </Table>;
   }
 
+  saveAccessToken = (event) => {    
+    Constants.accessToken = event.target.value;
+  }
+
   displaySearchBar() {
     return <Table striped bordered hover>
       <tbody>
         <tr>
 
-          <td>Filter Data</td>
+          <td>Access Token</td>
+          <td><input name="search" onChange={this.saveAccessToken} value={Constants.accessToken} /></td>
           <td>{this.state.sampleValue}</td>
           <td><input name="search" onChange={this.handleClick} value={this.state.filter} /></td>
           <td>Enter Start Range</td>
@@ -193,6 +200,8 @@ class TestTable extends React.Component {
     </Table>;
   }
 
+  
+
   fetchSample = (event) => {
     const requestOptions = {
       method: 'POST',
@@ -205,6 +214,10 @@ class TestTable extends React.Component {
   }
 
   getOpenPositions = (event) => {
+    if(!Constants.accessToken || Constants.accessToken.length === 0) {
+      alert('token is mandatory');
+      return;
+    }
     const requestOptions = {
       method: 'GET',
       headers: { 'Content-Type': 'application/json', 'X-Authorization-Token': this.accessToken }
