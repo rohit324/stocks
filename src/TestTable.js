@@ -18,7 +18,7 @@ class TestTable extends React.Component {
     projectedData: {},
     startRange: 16000,
     endRange: 19000,
-    sampleValue: 'Sample value'
+    sampleValue: 'Status'
   }
 
   tableSource() {
@@ -28,6 +28,11 @@ class TestTable extends React.Component {
 
   tableSourceFiltered(filter) {
     const val = Positions.getFilteredData(filter);
+    return val;
+  }
+
+  getFilteredDataWithData(data,filter) {
+    const val = Positions.getFilteredDataWithData(filter);
     return val;
   }
 
@@ -41,6 +46,28 @@ class TestTable extends React.Component {
     console.log(event.target.value);
     this.setState({
       data: this.tableSourceFiltered(event.target.value),
+      filter: event.target.value,
+      startRange: this.state.startRange,
+      endRange: this.state.endRange,
+      projectedData: this.state.projectedData,
+    });
+  };
+
+  search1 = (event) => {
+    console.log(event.target.value);
+    this.setState({
+      data: this.getFilteredDataWithData(this.state.data,event.target.value),
+      filter: event.target.value,
+      startRange: this.state.startRange,
+      endRange: this.state.endRange,
+      projectedData: this.state.projectedData,
+    });
+  };
+
+  search2 = (event) => {
+    console.log(event.target.value);
+    this.setState({
+      data: this.getFilteredDataWithData(this.state.data,event.target.value),
       filter: event.target.value,
       startRange: this.state.startRange,
       endRange: this.state.endRange,
@@ -167,8 +194,7 @@ class TestTable extends React.Component {
           <td>Symbol</td>
           <td>Product</td>
           <td>Qty</td>
-          <td>Sell Value</td>
-          <td>Buy Value</td>
+          <td>Current Value</td>
           <td>LTP</td>
           <td>PNL</td>
           <td>Buy Avg</td>
@@ -191,9 +217,19 @@ class TestTable extends React.Component {
         <tr>
           <td>{this.state.status}</td>
           <td>{this.state.message}</td>
+          <td>Add Scrip</td>
+          <td><input name="addScrip" onChange={this.addScrip} value={this.state.endRange} /></td>
         </tr>
       </tbody>
     </Table>
+  }
+
+  showError() {
+    if(this.state.status === 'error') {
+      <p style={{background:'red'}}>Error</p>
+    } else {
+      <p style={{background:'green'}}>Error</p>
+    }
   }
 
   displaySearchBar() {
@@ -204,6 +240,8 @@ class TestTable extends React.Component {
           <td><input name="search" onChange={this.saveAccessToken} value={Constants.accessToken} /></td>
           <td>{this.state.sampleValue}</td>
           <td><input name="search" onChange={this.handleClick} value={this.state.filter} /></td>
+          <td><input name="search2" onChange={this.search1}  /></td>
+          <td><input name="search3" onChange={this.search2}  /></td>
           <td>Enter Start Range</td>
           <td><input name="startRange" onChange={this.setStartRange} value={this.state.startRange} /></td>
           <td>Enter End Range</td>
@@ -240,6 +278,19 @@ class TestTable extends React.Component {
     fetch('https://alpha.sasonline.in/api/v1/positions?client_id=RA108&type=historical', requestOptions)
       .then(response => response.json())
       .then(data => {
+        if(data.status === 'error') {
+          this.setState({
+            data: this.state.data,
+            filter: this.state.filter,
+            projectedData: this.state.projectedData,
+            startRange: this.state.startRange,
+            endRange: this.state.endRange,
+            sampleValue: data.status,
+            status:data.status,
+            message: data.message
+
+          });  
+        }
         Positions.setData(data);
         this.setState({
           data: Positions.getFilteredData(this.state.filter),
@@ -322,17 +373,20 @@ class TestTable extends React.Component {
       <td>{data[index].trading_symbol}</td>
       <td>{data[index].symbol}</td>
       <td>{data[index].net_quantity}</td>
-      <td>{data[index].actual_cf_sell_amount}</td>
-      <td>{data[index].actual_cf_buy_amount}</td>
+      <td>{this.getCurrentValue(data[index])}</td>
       <td>{data[index].ltp}</td>
       <td>{Positions.getPNL(data[index])}</td>
-      <td>{data[index]['actual_average_buy_price']}</td>
-      <td>{data[index]['actual_average_sell_price']}</td>
+      <td>{this.getCurrentValue(data[index])}</td>
       <td><Button name={data[index].token} onClick={this.deleteRow} variant="outline-danger" size='sm'> Delete</Button></td>
       <td><Button name={data[index].token} onClick={() => this.sell(data[index])} variant="outline-info" size='sm'> Sell </Button></td>
       <td><Button name={data[index]} onClick={() => this.buy(data[index])} variant="outline-info" size='sm'> Buy </Button></td>
     </tr>
   }
+
+  getCurrentValue(value) {
+      return parseInt(value.ltp)*parseInt(value.net_quantity);
+  }
+
 
   getTotalDisplayRow(data) {
     const total = Positions.getTotalValues(data);
@@ -340,8 +394,7 @@ class TestTable extends React.Component {
       <td>{total.Symbol}</td>
       <td>{total.Product}</td>
       <td>{total.Qty}</td>
-      <td>{total.sellValue}</td>
-      <td>{total.buyValue}</td>
+      <td>{total.currentValue}</td>
       <td>{total.ltp}</td>
       <td>{total.PNL}</td>
       <td>{total['Buy Avg']}</td>

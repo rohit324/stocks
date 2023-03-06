@@ -7,10 +7,9 @@ class Positions {
     }
 
     static removeData(token) {
-        Positions.data.data = Positions.data.data.filter(val => 
-            {
-                return val.token!==parseInt(token);
-            });
+        Positions.data.data = Positions.data.data.filter(val => {
+            return val.token !== parseInt(token);
+        });
         console.log(Positions.data.data);
     }
 
@@ -18,18 +17,25 @@ class Positions {
         return Positions.data.data;
     }
 
-    static getFilteredData(filterText){
-        if(!filterText) {
+    static getFilteredData(filterText) {
+        if (!filterText) {
             return Positions.data.data;
         }
-        return Positions.data.data.filter(val => val.trading_symbol.toUpperCase().indexOf(filterText.toUpperCase())!==-1)
+        return Positions.data.data.filter(val => val.trading_symbol.toUpperCase().indexOf(filterText.toUpperCase()) !== -1)
     }
 
-    static getExcludeFilterData(filterText){
-        if(!filterText) {
+    static getFilteredDataWithData(data,filterText) {
+        if (!filterText) {
+            return data;
+        }
+        return data.filter(val => val.trading_symbol.toUpperCase().indexOf(filterText.toUpperCase()) !== -1)
+    }
+
+    static getExcludeFilterData(filterText) {
+        if (!filterText) {
             return Positions.data.data;
         }
-        return Positions.data.data.filter(val => val.trading_symbol.toUpperCase().indexOf(filterText.toUpperCase())===-1)
+        return Positions.data.data.filter(val => val.trading_symbol.toUpperCase().indexOf(filterText.toUpperCase()) === -1)
     }
 
     static getTotalValues(results) {
@@ -42,7 +48,7 @@ class Positions {
         total.price = 0;
         total.LTP = 0;
         total.PNL = 0;
-        total.sellValue = 100;
+        total.currentValue = 0;
         total.buyValue = 0;
         total.PEQty = 0;
         total.CEQty = 0;
@@ -56,35 +62,36 @@ class Positions {
             } else {
                 total.CEQty += parseInt(results[i].net_quantity);
             }
-            if (results[i].net_quantity < 0) {
-                total.sellValue += results[i].actual_cf_sell_amount;
-            } else {
-                total.buyValue += results[i].actual_cf_buy_amount;
-            }
-
+            total.currentValue += parseInt(results[i].ltp)*parseInt(results[i].net_quantity);
         }
         total.Qty = total.Qty + 'PE:' + total.PEQty + 'CE:' + total.CEQty;
         return total;
     }
 
-
-    static getPNL(value) {
-        const currentValue = value.net_amount_mtm;
-        const totalTradedValue = value.actual_cf_sell_amount - value.actual_cf_buy_amount;
-        let PNL = 0;
-        if (value.net_quantity <= 0) {
-            PNL = parseInt(totalTradedValue - currentValue);
-        } else {
-            PNL = parseInt(totalTradedValue - currentValue);
-        }
-        return PNL;
+    static getSellPrice(value) {
+        if (parseInt(value.average_sell_price) === 0) return parseInt(value.actual_average_sell_price);
+        return parseInt(value.average_sell_price);
     }
 
-    static getProjectedData(startRange, endRange,results) {
+    static getBuyPrice(value) {
+        if (parseInt(value.average_buy_price) === 0) return parseInt(value.actual_average_buy_price);
+        return parseInt(value.average_buy_price);
+    }
+
+    static getPNL(value) {
+        if (value.net_quantity < 0) {
+            return parseInt(parseInt(value.ltp) - Positions.getSellPrice(value)) * parseInt(value.net_quantity);
+        } else {
+            return parseInt(parseInt(value.ltp) - Positions.getBuyPrice(value)) * parseInt(value.net_quantity);
+        }
+
+    }
+
+    static getProjectedData(startRange, endRange, results) {
         startRange = parseInt(startRange);
         endRange = parseInt(endRange);
         const values = [];
-        for(let projectedStrikePrice=startRange;projectedStrikePrice<endRange;projectedStrikePrice= projectedStrikePrice+100) {
+        for (let projectedStrikePrice = startRange; projectedStrikePrice < endRange; projectedStrikePrice = projectedStrikePrice + 100) {
             const value = {};
             value.totalCEQty = 0;
             value.totalPEQty = 0;
@@ -93,44 +100,44 @@ class Positions {
             value.strikePrice = projectedStrikePrice;
             for (let index = 0; index < results.length; index++) {
                 const element = results[index];
-                const strikePrice = element.trading_symbol.substring(element.trading_symbol.length-7,element.trading_symbol.length-2);
-                value.Symbol = element.trading_symbol;     
-                if(element.trading_symbol.endsWith('CE')) {
+                const strikePrice = element.trading_symbol.substring(element.trading_symbol.length - 7, element.trading_symbol.length - 2);
+                value.Symbol = element.trading_symbol;
+                if (element.trading_symbol.endsWith('CE')) {
                     value.totalCEQty += parseInt(element.net_quantity);
-                    if(element.net_quantity <  0) {
-                        if(projectedStrikePrice<=strikePrice) {
-                            value.totalCEPNL +=  (-element.net_quantity)*element['actual_average_sell_price'] 
+                    if (element.net_quantity < 0) {
+                        if (projectedStrikePrice <= strikePrice) {
+                            value.totalCEPNL += (-element.net_quantity) * element['actual_average_sell_price']
                         } else {
-                            value.totalCEPNL -=  (-element.net_quantity)*((projectedStrikePrice-strikePrice) - (element['actual_average_sell_price'])) 
+                            value.totalCEPNL -= (-element.net_quantity) * ((projectedStrikePrice - strikePrice) - (element['actual_average_sell_price']))
                         }
                     } else {
-                        if(projectedStrikePrice<=strikePrice) {
-                            value.totalCEPNL -=  element.net_quantity*element['actual_average_buy_price'] 
+                        if (projectedStrikePrice <= strikePrice) {
+                            value.totalCEPNL -= element.net_quantity * element['actual_average_buy_price']
                         } else {
-                            value.totalCEPNL +=  element.net_quantity*((projectedStrikePrice-strikePrice) - (element['actual_average_buy_price']))
+                            value.totalCEPNL += element.net_quantity * ((projectedStrikePrice - strikePrice) - (element['actual_average_buy_price']))
                         }
                     }
-                }  else {
+                } else {
                     value.totalPEQty += parseInt(element.net_quantity);
-                    if(element.net_quantity <  0) {
-                        if(projectedStrikePrice>=strikePrice) {
-                            value.totalPEPNL +=  (-element.net_quantity)*element['actual_average_sell_price'] 
+                    if (element.net_quantity < 0) {
+                        if (projectedStrikePrice >= strikePrice) {
+                            value.totalPEPNL += (-element.net_quantity) * element['actual_average_sell_price']
                         } else {
-                            value.totalPEPNL -=  (-element.net_quantity)*((strikePrice-projectedStrikePrice) - (element['actual_average_sell_price'])) 
+                            value.totalPEPNL -= (-element.net_quantity) * ((strikePrice - projectedStrikePrice) - (element['actual_average_sell_price']))
                         }
                     } else {
-                        if(projectedStrikePrice>=strikePrice) {
-                            value.totalPEPNL -=  element.net_quantity*element['actual_average_buy_price'] 
+                        if (projectedStrikePrice >= strikePrice) {
+                            value.totalPEPNL -= element.net_quantity * element['actual_average_buy_price']
                         } else {
-                            value.totalPEPNL +=  element.net_quantity*((strikePrice-projectedStrikePrice) - (element['actual_average_buy_price']))
+                            value.totalPEPNL += element.net_quantity * ((strikePrice - projectedStrikePrice) - (element['actual_average_buy_price']))
                         }
                     }
-                }   
+                }
             }
             value.totalPNL = value.totalPEPNL + value.totalCEPNL;
             values.push(value);
-    
-         }    
+
+        }
 
         return values;
     }
