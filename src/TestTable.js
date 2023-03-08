@@ -5,9 +5,12 @@ import Button from 'react-bootstrap/Button';
 import Positions from './Positions';
 import Constants from './Constants';
 import Orders from './Orders';
+import PositionsDisplay from './PositionsDisplay';
+import SearchDisplay from './SearchDisplay';
+
 class TestTable extends React.Component {
 
-  
+
 
   defaultFilter = 'MAY';
   accessToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJibGFja2xpc3Rfa2V5IjoiUkExMDg6WW5USXZWMUU3dGtjUUZuaEhTTjh4QSIsImNsaWVudF9pZCI6IlJBMTA4IiwiY2xpZW50X3Rva2VuIjoiY25XckpTajh6dXJBejhuRnVpc25wUSIsImRldmljZSI6IndlYiIsImV4cCI6MTY3ODA3NDQzNzAxMH0.u6JHL6HmFhNw6pZz0ESH9lczQWxyf8OULgn63MLsU1g`
@@ -15,6 +18,8 @@ class TestTable extends React.Component {
   state = {
     data: {},
     filter: this.defaultFilter,
+    filter1: this.defaultFilter,
+    filter2: this.defaultFilter,
     projectedData: {},
     startRange: 16000,
     endRange: 19000,
@@ -31,8 +36,8 @@ class TestTable extends React.Component {
     return val;
   }
 
-  getFilteredDataWithData(data,filter) {
-    const val = Positions.getFilteredDataWithData(filter);
+  getFilteredDataWithData(data, filter) {
+    const val = Positions.getFilteredDataWithData(data,filter);
     return val;
   }
 
@@ -56,8 +61,8 @@ class TestTable extends React.Component {
   search1 = (event) => {
     console.log(event.target.value);
     this.setState({
-      data: this.getFilteredDataWithData(this.state.data,event.target.value),
-      filter: event.target.value,
+      data: this.getFilteredDataWithData(this.state.data, event.target.value),
+      filter: this.state.filter,
       startRange: this.state.startRange,
       endRange: this.state.endRange,
       projectedData: this.state.projectedData,
@@ -67,7 +72,7 @@ class TestTable extends React.Component {
   search2 = (event) => {
     console.log(event.target.value);
     this.setState({
-      data: this.getFilteredDataWithData(this.state.data,event.target.value),
+      data: this.getFilteredDataWithData(this.state.data, event.target.value),
       filter: event.target.value,
       startRange: this.state.startRange,
       endRange: this.state.endRange,
@@ -129,10 +134,10 @@ class TestTable extends React.Component {
     const data = this.state.data;
     const positionRows = [];
     for (let index = 0; index < data.length; index++) {
-      positionRows.push(this.getDisplayRow(data, index));
+      positionRows.push(PositionsDisplay.getDisplayRow(data, index, this));
     }
     if (data && data.length > 0) {
-      positionRows.push(this.getTotalDisplayRow(data));
+      positionRows.push(PositionsDisplay.getTotalDisplayRow(data));
     }
     positionRows.push(Positions)
     const projectedData = this.state.projectedData;
@@ -141,11 +146,12 @@ class TestTable extends React.Component {
       projectedRows.push(this.getProjectedRow(projectedData, index));
     }
     return (
+      
       <div style={{ padding: '50px' }}>
 
         {this.displayStatusHeader()}
 
-        {this.displaySearchBar()}
+        {SearchDisplay.displaySearchBar(this)}
 
         {this.displayPositionsTable(positionRows)}
 
@@ -194,11 +200,11 @@ class TestTable extends React.Component {
           <td>Symbol</td>
           <td>Product</td>
           <td>Qty</td>
+          <td>CE Value</td>
+          <td>PE Value</td>
           <td>Current Value</td>
           <td>LTP</td>
           <td>PNL</td>
-          <td>Buy Avg</td>
-          <td>Sell Avg</td>
         </tr>
       </thead>
       <tbody>
@@ -225,33 +231,13 @@ class TestTable extends React.Component {
   }
 
   showError() {
-    if(this.state.status === 'error') {
-      <p style={{background:'red'}}>Error</p>
+    if (this.state.status === 'error') {
+      <p style={{ background: 'red' }}>Error</p>
     } else {
-      <p style={{background:'green'}}>Error</p>
+      <p style={{ background: 'green' }}>Error</p>
     }
   }
 
-  displaySearchBar() {
-    return <Table striped bordered hover>
-      <tbody>
-        <tr>
-          <td>Access Token</td>
-          <td><input name="search" onChange={this.saveAccessToken} value={Constants.accessToken} /></td>
-          <td>{this.state.sampleValue}</td>
-          <td><input name="search" onChange={this.handleClick} value={this.state.filter} /></td>
-          <td><input name="search2" onChange={this.search1}  /></td>
-          <td><input name="search3" onChange={this.search2}  /></td>
-          <td>Enter Start Range</td>
-          <td><input name="startRange" onChange={this.setStartRange} value={this.state.startRange} /></td>
-          <td>Enter End Range</td>
-          <td><input name="endRange" onChange={this.setEndRange} value={this.state.endRange} /></td>
-          <td><Button name="endRange" onClick={this.displayPNLData} variant="secondary" size='md'>Show Projections</Button></td>
-          <td><Button name="sampleFetch" onClick={this.getOpenPositions} variant="secondary" size='md'>Sample fetch</Button></td>
-        </tr>
-      </tbody>
-    </Table>;
-  }
 
 
 
@@ -278,7 +264,7 @@ class TestTable extends React.Component {
     fetch('https://alpha.sasonline.in/api/v1/positions?client_id=RA108&type=historical', requestOptions)
       .then(response => response.json())
       .then(data => {
-        if(data.status === 'error') {
+        if (data.status === 'error') {
           this.setState({
             data: this.state.data,
             filter: this.state.filter,
@@ -286,10 +272,10 @@ class TestTable extends React.Component {
             startRange: this.state.startRange,
             endRange: this.state.endRange,
             sampleValue: data.status,
-            status:data.status,
+            status: data.status,
             message: data.message
 
-          });  
+          });
         }
         Positions.setData(data);
         this.setState({
@@ -305,7 +291,7 @@ class TestTable extends React.Component {
 
   sell = (data) => {
     const order = Orders.getSampleOrder;
-    order.instrument_token = data.token+'';
+    order.instrument_token = data.token + '';
     order.price = data.ltp;
     order.order_side = 'SELL';
     if (data.trading_symbol.startsWith('BANK')) {
@@ -328,16 +314,15 @@ class TestTable extends React.Component {
           startRange: this.state.startRange,
           endRange: this.state.endRange,
           sampleValue: data.status,
-          status:data.status,
-          message:data.message
+          status: data.status,
+          message: data.message
         });
       });
-
   }
 
   buy = (data) => {
     const order = Orders.getSampleOrder;
-    order.instrument_token = data.token+'';
+    order.instrument_token = data.token + '';
     order.price = data.ltp;
     order.order_side = 'BUY';
     if (data.trading_symbol.startsWith('BANK')) {
@@ -360,47 +345,12 @@ class TestTable extends React.Component {
           startRange: this.state.startRange,
           endRange: this.state.endRange,
           sampleValue: data.status,
-          status:data.status,
-          message:data.message
+          status: data.status,
+          message: data.message
         });
       });
 
 
-  }
-
-  getDisplayRow(data, index) {
-    return <tr>
-      <td>{data[index].trading_symbol}</td>
-      <td>{data[index].symbol}</td>
-      <td>{data[index].net_quantity}</td>
-      <td>{this.getCurrentValue(data[index])}</td>
-      <td>{data[index].ltp}</td>
-      <td>{Positions.getPNL(data[index])}</td>
-      <td>{this.getCurrentValue(data[index])}</td>
-      <td><Button name={data[index].token} onClick={this.deleteRow} variant="outline-danger" size='sm'> Delete</Button></td>
-      <td><Button name={data[index].token} onClick={() => this.sell(data[index])} variant="outline-info" size='sm'> Sell </Button></td>
-      <td><Button name={data[index]} onClick={() => this.buy(data[index])} variant="outline-info" size='sm'> Buy </Button></td>
-    </tr>
-  }
-
-  getCurrentValue(value) {
-      return parseInt(value.ltp)*parseInt(value.net_quantity);
-  }
-
-
-  getTotalDisplayRow(data) {
-    const total = Positions.getTotalValues(data);
-    return <tr>
-      <td>{total.Symbol}</td>
-      <td>{total.Product}</td>
-      <td>{total.Qty}</td>
-      <td>{total.currentValue}</td>
-      <td>{total.ltp}</td>
-      <td>{total.PNL}</td>
-      <td>{total['Buy Avg']}</td>
-      <td>{total['Sell Avg']}</td>
-
-    </tr>
   }
 
   getProjectedRow(data, index) {

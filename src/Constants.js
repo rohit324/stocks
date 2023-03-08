@@ -1,6 +1,6 @@
 class Constants {
 
-    static accessToken;
+    static accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJibGFja2xpc3Rfa2V5IjoiUkExMDg6Z28wd01QUjBJQ241TTRZOG5OM3hiZyIsImNsaWVudF9pZCI6IlJBMTA4IiwiY2xpZW50X3Rva2VuIjoiS3IrSXVOcUs0RUNoeE45UmF3R1JZdyIsImRldmljZSI6IndlYiIsImV4cCI6MTY3ODE5NDc1NzYyM30.2jUqP5BTbiDzqd9WirXkJSctQ1urmtMZUazgXm6eGxA';
     static currentRecord;
 }
 

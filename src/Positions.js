@@ -13,6 +13,14 @@ class Positions {
         console.log(Positions.data.data);
     }
 
+    static removePosition(data,token) {
+        data = data.filter(val => {
+            return val.token !== parseInt(token);
+        });
+        return data;
+    }
+
+
     static getFromattedData() {
         return Positions.data.data;
     }
@@ -38,6 +46,10 @@ class Positions {
         return Positions.data.data.filter(val => val.trading_symbol.toUpperCase().indexOf(filterText.toUpperCase()) === -1)
     }
 
+    static getExcludeFilterDataWithData(data,filterText) {
+        return data.filter(val => val.trading_symbol.toUpperCase().indexOf(filterText.toUpperCase()) === -1)
+    }
+
     static getTotalValues(results) {
         const total = {};
         if (!results || results.length === 0) return results;
@@ -52,6 +64,8 @@ class Positions {
         total.buyValue = 0;
         total.PEQty = 0;
         total.CEQty = 0;
+        total.CEValue = 0;
+        total.PEValue = 0;
 
         for (let i = 0; i < results.length; i++) {
             total.Qty += parseInt(results[i].net_quantity);
@@ -63,14 +77,19 @@ class Positions {
                 total.CEQty += parseInt(results[i].net_quantity);
             }
             total.currentValue += parseInt(results[i].ltp)*parseInt(results[i].net_quantity);
+            if(results[i].trading_symbol.endsWith('CE')) {
+                total.CEValue += this.getCEValue(results[i]);
+            } else {
+                total.PEValue += this.getPEValue(results[i]);
+            }
         }
         total.Qty = total.Qty + 'PE:' + total.PEQty + 'CE:' + total.CEQty;
         return total;
     }
 
     static getSellPrice(value) {
-        if (parseInt(value.average_sell_price) === 0) return parseInt(value.actual_average_sell_price);
-        return parseInt(value.average_sell_price);
+        if (parseInt(value.actual_average_sell_price) === 0) return parseInt(value.average_sell_price);
+        return parseInt(value.actual_average_sell_price);
     }
 
     static getBuyPrice(value) {
@@ -106,30 +125,30 @@ class Positions {
                     value.totalCEQty += parseInt(element.net_quantity);
                     if (element.net_quantity < 0) {
                         if (projectedStrikePrice <= strikePrice) {
-                            value.totalCEPNL += (-element.net_quantity) * element['actual_average_sell_price']
+                            value.totalCEPNL += (-element.net_quantity) * this.getSellPrice(element);
                         } else {
-                            value.totalCEPNL -= (-element.net_quantity) * ((projectedStrikePrice - strikePrice) - (element['actual_average_sell_price']))
+                            value.totalCEPNL -= (-element.net_quantity) * ((projectedStrikePrice - strikePrice) - (this.getSellPrice(element)))
                         }
                     } else {
                         if (projectedStrikePrice <= strikePrice) {
-                            value.totalCEPNL -= element.net_quantity * element['actual_average_buy_price']
+                            value.totalCEPNL -= element.net_quantity * this.getBuyPrice(element)
                         } else {
-                            value.totalCEPNL += element.net_quantity * ((projectedStrikePrice - strikePrice) - (element['actual_average_buy_price']))
+                            value.totalCEPNL += element.net_quantity * ((projectedStrikePrice - strikePrice) - (this.getBuyPrice(element)))
                         }
                     }
                 } else {
                     value.totalPEQty += parseInt(element.net_quantity);
                     if (element.net_quantity < 0) {
                         if (projectedStrikePrice >= strikePrice) {
-                            value.totalPEPNL += (-element.net_quantity) * element['actual_average_sell_price']
+                            value.totalPEPNL += (-element.net_quantity) * this.getSellPrice(element);
                         } else {
-                            value.totalPEPNL -= (-element.net_quantity) * ((strikePrice - projectedStrikePrice) - (element['actual_average_sell_price']))
+                            value.totalPEPNL -= (-element.net_quantity) * ((strikePrice - projectedStrikePrice) - (this.getSellPrice(element)))
                         }
                     } else {
                         if (projectedStrikePrice >= strikePrice) {
-                            value.totalPEPNL -= element.net_quantity * element['actual_average_buy_price']
+                            value.totalPEPNL -= element.net_quantity * this.getBuyPrice(element);
                         } else {
-                            value.totalPEPNL += element.net_quantity * ((strikePrice - projectedStrikePrice) - (element['actual_average_buy_price']))
+                            value.totalPEPNL += element.net_quantity * ((strikePrice - projectedStrikePrice) - (this.getBuyPrice(element)))
                         }
                     }
                 }
@@ -141,6 +160,24 @@ class Positions {
 
         return values;
     }
+
+    static getCurrentValue(value) {
+        return parseInt(value.ltp) * parseInt(value.net_quantity);
+      }
+    
+      static getCEValue(value) {
+        if(value.trading_symbol.endsWith('CE')) {
+        return parseInt(value.ltp) * parseInt(value.net_quantity);
+        }
+        return 0;
+      }
+    
+      static getPEValue(value) {
+        if(value.trading_symbol.endsWith('PE')) {
+          return parseInt(value.ltp) * parseInt(value.net_quantity);
+          }
+          return 0;
+      }
 
     static test = `{"data":[{"actual_average_buy_price":0.0,"actual_average_sell_price":393.15,"actual_cf_buy_amount":0.0,"actual_cf_sell_amount":9828.75,"average_buy_price":0.0,"average_price":0,"average_sell_price":0.0,"buy_amount":0.0,"buy_quantity":0,"cf_buy_amount":0.0,"cf_buy_quantity":0,"cf_sell_amount":8832.5,"cf_sell_quantity":25,"client_id":"RA108","exchange":"NFO","instrument_token":41635,"ltp":353.6,"multiplier":1,"net_amount_mtm":8832.5,"net_quantity":-25,"pro_cli":"CLIENT","prod_type":"NRML","product":"NRML","realized_mtm":0.0,"segment":null,"sell_amount":0.0,"sell_quantity":0,"symbol":"BANKNIFTY","token":41635,"trading_symbol":"BANKNIFTY2332341000PE","v_login_id":"RA108"},{"actual_average_buy_price":0.0,"actual_average_sell_price":1570.0,"actual_cf_buy_amount":0.0,"actual_cf_sell_amount":39250.0,"average_buy_price":0.0,"average_price":0,"average_sell_price":0.0,"buy_amount":0.0,"buy_quantity":0,"cf_buy_amount":0.0,"cf_buy_quantity":0,"cf_sell_amount":48490.0,"cf_sell_quantity":25,"client_id":"RA108","exchange":"NFO","instrument_token":53311,"ltp":1930.05,"multiplier":1,"net_amount_mtm":48490.0,"net_quantity":-25,"pro_cli":"CLIENT","prod_type":"NRML","product":"NRML","realized_mtm":0.0,"segment":null,"sell_amount":0.0,"sell_quantity":0,"symbol":"BANKNIFTY","token":53311,"trading_symbol":"BANKNIFTY23APR40000CE","v_login_id":"RA108"},{"actual_average_buy_price":7.1,"actual_average_sell_price":0.0,"actual_cf_buy_amount":1420.0,"actual_cf_sell_amount":0.0,"average_buy_price":0.0,"average_price":0,"average_sell_price":0.0,"buy_amount":0.0,"buy_quantity":0,"cf_buy_amount":1080.0,"cf_buy_quantity":200,"cf_sell_amount":0.0,"cf_sell_quantity":0,"client_id":"RA108","exchange":"NFO","instrument_token":47299,"ltp":4.7,"multiplier":1,"net_amount_mtm":-1080.0,"net_quantity":200,"pro_cli":"CLIENT","prod_type":"NRML","product":"NRML","realized_mtm":0.0,"segment":null,"sell_amount":0.0,"sell_quantity":0,"symbol":"NIFTY","token":47299,"trading_symbol":"NIFTY2330917900CE","v_login_id":"RA108"},{"actual_average_buy_price":0.0,"actual_average_sell_price":391.01,"actual_cf_buy_amount":0.0,"actual_cf_sell_amount":78202.0,"average_buy_price":0.0,"average_price":0,"average_sell_price":0.0,"buy_amount":0.0,"buy_quantity":0,"cf_buy_amount":0.0,"cf_buy_quantity":0,"cf_sell_amount":77830.0,"cf_sell_quantity":200,"client_id":"RA108","exchange":"NFO","instrument_token":54348,"ltp":377.2,"multiplier":1,"net_amount_mtm":77830.0,"net_quantity":-200,"pro_cli":"CLIENT","prod_type":"NRML","product":"NRML","realized_mtm":0.0,"segment":null,"sell_amount":0.0,"sell_quantity":0,"symbol":"NIFTY","token":54348,"trading_symbol":"NIFTY23APR17600CE","v_login_id":"RA108"},{"actual_average_buy_price":0.0,"actual_average_sell_price":587.15,"actual_cf_buy_amount":0.0,"actual_cf_sell_amount":29357.5,"average_buy_price":0.0,"average_price":0,"average_sell_price":0.0,"buy_amount":0.0,"buy_quantity":0,"cf_buy_amount":0.0,"cf_buy_quantity":0,"cf_sell_amount":27560.0,"cf_sell_quantity":50,"client_id":"RA108","exchange":"NFO","instrument_token":53407,"ltp":565.0,"multiplier":1,"net_amount_mtm":27560.0,"net_quantity":-50,"pro_cli":"CLIENT","prod_type":"NRML","product":"NRML","realized_mtm":0.0,"segment":null,"sell_amount":0.0,"sell_quantity":0,"symbol":"NIFTY","token":53407,"trading_symbol":"NIFTY23MAR18200PE","v_login_id":"RA108"},{"actual_average_buy_price":0.0,"actual_average_sell_price":751.25,"actual_cf_buy_amount":0.0,"actual_cf_sell_amount":37562.5,"average_buy_price":0.0,"average_price":0,"average_sell_price":0.0,"buy_amount":0.0,"buy_quantity":0,"cf_buy_amount":0.0,"cf_buy_quantity":0,"cf_sell_amount":37260.0,"cf_sell_quantity":50,"client_id":"RA108","exchange":"NFO","instrument_token":53415,"ltp":752.75,"multiplier":1,"net_amount_mtm":37260.0,"net_quantity":-50,"pro_cli":"CLIENT","prod_type":"NRML","product":"NRML","realized_mtm":0.0,"segment":null,"sell_amount":0.0,"sell_quantity":0,"symbol":"NIFTY","token":53415,"trading_symbol":"NIFTY23MAR18400PE","v_login_id":"RA108"},{"actual_average_buy_price":0.0,"actual_average_sell_price":443.2,"actual_cf_buy_amount":0.0,"actual_cf_sell_amount":22160.0,"average_buy_price":0.0,"average_price":0,"average_sell_price":0.0,"buy_amount":0.0,"buy_quantity":0,"cf_buy_amount":0.0,"cf_buy_quantity":0,"cf_sell_amount":27865.0,"cf_sell_quantity":50,"client_id":"RA108","exchange":"NFO","instrument_token":73500,"ltp":556.95,"multiplier":1,"net_amount_mtm":27865.0,"net_quantity":-50,"pro_cli":"CLIENT","prod_type":"NRML","product":"NRML","realized_mtm":0.0,"segment":null,"sell_amount":0.0,"sell_quantity":0,"symbol":"NIFTY","token":73500,"trading_symbol":"NIFTY23MAY17500CE","v_login_id":"RA108"},{"actual_average_buy_price":0.0,"actual_average_sell_price":357.6,"actual_cf_buy_amount":0.0,"actual_cf_sell_amount":17880.0,"average_buy_price":0.0,"average_price":0,"average_sell_price":0.0,"buy_amount":0.0,"buy_quantity":0,"cf_buy_amount":0.0,"cf_buy_quantity":0,"cf_sell_amount":12550.0,"cf_sell_quantity":50,"client_id":"RA108","exchange":"NFO","instrument_token":73501,"ltp":253.7,"multiplier":1,"net_amount_mtm":12550.0,"net_quantity":-50,"pro_cli":"CLIENT","prod_type":"NRML","product":"NRML","realized_mtm":0.0,"segment":null,"sell_amount":0.0,"sell_quantity":0,"symbol":"NIFTY","token":73501,"trading_symbol":"NIFTY23MAY17500PE","v_login_id":"RA108"}],"message":"","status":"success"}`
 

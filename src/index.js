@@ -3,11 +3,12 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import TestTable from './TestTable';
+import SASDashboard from './SASDashboard';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <TestTable/>
+    <SASDashboard/>
   </React.StrictMode>
 );
 
