@@ -1,5 +1,5 @@
 class SASConstants {
-    static accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJibGFja2xpc3Rfa2V5IjoiUkExMDg6STRrV3pscStSS0lRWGFKT0o5YTh5dyIsImNsaWVudF9pZCI6IlJBMTA4IiwiY2xpZW50X3Rva2VuIjoiYzBoTnRHUDlSUFdKSVNjMFpQZEVyZyIsImRldmljZSI6IndlYiIsImV4cCI6MTY3ODMzOTA1ODkzNn0.Ioc5wh9Q_yKThfUzZkwurveIkJANdVTjgD90KK0pRhc';
+    static accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJibGFja2xpc3Rfa2V5IjoiU0ozNDM6a08wVGx4b3hrYloydWJ0MnlUU0lodyIsImNsaWVudF9pZCI6IlNKMzQzIiwiY2xpZW50X3Rva2VuIjoiR2hCUm1FbldGZk5ZOVdlMHZTRENTdyIsImRldmljZSI6IndlYiIsImV4cCI6MTY3ODUxMzI3MzUzMX0.nrrhM_m3C-xJ4STrdPPQgjVemJbB3_sxLXLSfRqbxzE'
     static fetchedData = [];
     static currentPositionsData = [];
     static projectedData = [];

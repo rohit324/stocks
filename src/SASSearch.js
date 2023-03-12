@@ -6,6 +6,8 @@ import Positions from './Positions';
 import SamplePositions from './SamplePositions';
 class SASSearch extends React.Component {
 
+    
+
     state = {
         filter: '',
         filter1: '',
@@ -15,6 +17,7 @@ class SASSearch extends React.Component {
         exludeFilter2: '',
         startRange: 16000,
         endRange: 19000,
+        accessToken: SASConstants.accessToken
     }
 
     getCurrentState() {
@@ -72,6 +75,11 @@ class SASSearch extends React.Component {
         this.props.rerenderParentCallback();
     };
 
+    exclude0Qty = (event) => {
+        SASConstants.currentPositionsData = Positions.exclude0QtyValues(SASConstants.currentPositionsData);
+        this.props.rerenderParentCallback();
+    };
+
 
     setStartRange = (event) => {
         const state = this.getCurrentState();
@@ -88,6 +96,10 @@ class SASSearch extends React.Component {
 
     saveAccessToken = (event) => {
         SASConstants.accessToken = event.target.value;
+        const state = this.getCurrentState();
+        state.accessToken = event.target.value;      
+        this.setState(state);  
+        this.props.rerenderParentCallback();    
     }
 
     displayProjectedPNL = (event) => {
@@ -123,6 +135,8 @@ class SASSearch extends React.Component {
     }
 
     getOpenPositions = (event) => {
+        SASConstants.status = 'Network call in progress.'
+        SASConstants.message = 'Calling the server.'
         if (SASConstants.debug && SASConstants.debug.length > 0) {
             console.log('debug mode is enabled ');
             SASConstants.currentPositionsData = SamplePositions.getSampleData();
@@ -157,6 +171,7 @@ class SASSearch extends React.Component {
                 this.filterCurrentData();
                 this.props.rerenderParentCallback();
             });
+        this.props.rerenderParentCallback();
     }
 
 
@@ -167,12 +182,7 @@ class SASSearch extends React.Component {
                     <tbody>
                         <tr>
                             <td>Access Token</td>
-                            <td colSpan={4}><input name="accessToken" onChange={this.saveAccessToken} value={SASConstants.accessToken} /></td>
-                            <td>Include Filters</td>
-                            <td><input name="filter" onChange={this.filter} value={this.state.filter} /></td>
-                            <td><input name="filter1" onChange={this.filter1} value={this.state.filter1} /></td>
-                            <td><input name="filter2" onChange={this.filter2} value={this.state.filter2} /></td>
-
+                            <td colSpan={8}><textarea name="accessToken" style={{width:'100%'}} onChange={this.saveAccessToken} value={this.state.accessToken} /></td>
                         </tr>
                     </tbody>
                 </Table>
@@ -183,6 +193,17 @@ class SASSearch extends React.Component {
                             <td><input name="exludeFilter" onChange={this.exludeFilter} value={this.state.exludeFilter} /></td>
                             <td><input name="exludeFilter1" onChange={this.exludeFilter1} value={this.state.exludeFilter1} /></td>
                             <td><input name="exludeFilter2" onChange={this.exludeFilter2} value={this.state.exludeFilter2} /></td>
+                            <td><Button onClick={this.exclude0Qty} > Exclude 0 Qty</Button></td>
+                        </tr>
+                    </tbody>
+                </Table>
+                <Table striped bordered hover size='sm'>
+                    <tbody>
+                        <tr>
+                            <td>Include Filters</td>
+                            <td><input name="filter" onChange={this.filter} value={this.state.filter} /></td>
+                            <td><input name="filter1" onChange={this.filter1} value={this.state.filter1} /></td>
+                            <td><input name="filter2" onChange={this.filter2} value={this.state.filter2} /></td>
                             <td>Enter Start Range</td>
                             <td><input name="startRange" onChange={this.setStartRange} value={this.state.startRange} /></td>
                             <td>Enter End Range</td>

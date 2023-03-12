@@ -50,6 +50,10 @@ class Positions {
         return data.filter(val => val.trading_symbol.toUpperCase().indexOf(filterText.toUpperCase()) === -1)
     }
 
+    static exclude0QtyValues(data) {
+        return data.filter(val => val.net_quantity !== 0);
+    }
+
     static getTotalValues(results) {
         const total = {};
         if (!results || results.length === 0) return results;
@@ -88,8 +92,8 @@ class Positions {
     }
 
     static getSellPrice(value) {
-        if (parseInt(value.actual_average_sell_price) === 0) return parseInt(value.average_sell_price);
-        return parseInt(value.actual_average_sell_price);
+        if (parseInt(value.average_sell_price) === 0) return parseInt(value.actual_average_sell_price);
+        return parseInt(value.average_sell_price);
     }
 
     static getBuyPrice(value) {
