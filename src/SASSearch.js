@@ -75,6 +75,22 @@ class SASSearch extends React.Component {
         this.props.rerenderParentCallback();
     };
 
+    exludeFilter3 = (event) => {
+        const state = this.getCurrentState();
+        state.exludeFilter3 = event.target.value;
+        this.setState(state);
+        this.filterCurrentData();
+        this.props.rerenderParentCallback();
+    };
+
+    exludeFilter4 = (event) => {
+        const state = this.getCurrentState();
+        state.exludeFilter4 = event.target.value;
+        this.setState(state);
+        this.filterCurrentData();
+        this.props.rerenderParentCallback();
+    };
+
     exclude0Qty = (event) => {
         SASConstants.currentPositionsData = Positions.exclude0QtyValues(SASConstants.currentPositionsData);
         this.props.rerenderParentCallback();
@@ -130,6 +146,12 @@ class SASSearch extends React.Component {
             SASConstants.currentPositionsData = Positions.getExcludeFilterDataWithData(SASConstants.currentPositionsData, this.state.exludeFilter1);
         }
         if (this.state.exludeFilter2) {
+            SASConstants.currentPositionsData = Positions.getExcludeFilterDataWithData(SASConstants.currentPositionsData, this.state.exludeFilter2);
+        }
+        if (this.state.exludeFilter3) {
+            SASConstants.currentPositionsData = Positions.getExcludeFilterDataWithData(SASConstants.currentPositionsData, this.state.exludeFilter2);
+        }
+        if (this.state.exludeFilter4) {
             SASConstants.currentPositionsData = Positions.getExcludeFilterDataWithData(SASConstants.currentPositionsData, this.state.exludeFilter2);
         }
     }
@@ -193,6 +215,8 @@ class SASSearch extends React.Component {
                             <td><input name="exludeFilter" onChange={this.exludeFilter} value={this.state.exludeFilter} /></td>
                             <td><input name="exludeFilter1" onChange={this.exludeFilter1} value={this.state.exludeFilter1} /></td>
                             <td><input name="exludeFilter2" onChange={this.exludeFilter2} value={this.state.exludeFilter2} /></td>
+                            <td><input name="exludeFilter3" onChange={this.exludeFilter3} value={this.state.exludeFilter3} /></td>
+                            <td><input name="exludeFilter4" onChange={this.exludeFilter4} value={this.state.exludeFilter4} /></td>
                             <td><Button onClick={this.exclude0Qty} > Exclude 0 Qty</Button></td>
                         </tr>
                     </tbody>

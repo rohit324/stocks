@@ -98,6 +98,7 @@ class SASPositions extends React.Component {
             <td>{Positions.getCurrentValue(data[index])}</td>
             <td>{data[index].ltp}</td>
             <td>{Positions.getPNL(data[index])}</td>
+            <td>Comments</td>
             <td>{Positions.getBuyPrice(data[index])}</td>
             <td>{Positions.getSellPrice(data[index])}</td>
             <td><Button name={data[index].token} onClick={this.deleteRow} variant="outline-danger" size='sm'> Delete</Button></td>
@@ -119,6 +120,7 @@ class SASPositions extends React.Component {
                     <td>Current Value</td>
                     <td>LTP</td>
                     <td>PNL</td>
+                    <td>Comments</td>
                     <td>Buy Price</td>
                     <td>Sell Price</td>
                 </tr>
