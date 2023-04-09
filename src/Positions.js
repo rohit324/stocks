@@ -54,6 +54,14 @@ class Positions {
         return data.filter(val => val.net_quantity !== 0);
     }
 
+    static getLongPositions(data) {
+        return data.filter(val => val.net_quantity > 0);
+    }
+
+    static getShortPositions(data) {
+        return data.filter(val => val.net_quantity < 0);
+    }
+
     static getTotalValues(results) {
         const total = {};
         if (!results || results.length === 0) return results;

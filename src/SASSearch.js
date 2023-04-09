@@ -96,6 +96,16 @@ class SASSearch extends React.Component {
         this.props.rerenderParentCallback();
     };
 
+    showOnlyLong = (event) => {
+        SASConstants.currentPositionsData = Positions.getLongPositions(SASConstants.currentPositionsData);
+        this.props.rerenderParentCallback();
+    };
+
+    showOnlyShort = (event) => {
+        SASConstants.currentPositionsData = Positions.getShortPositions(SASConstants.currentPositionsData);
+        this.props.rerenderParentCallback();
+    };
+
 
     setStartRange = (event) => {
         const state = this.getCurrentState();
@@ -217,7 +227,12 @@ class SASSearch extends React.Component {
                             <td><input name="exludeFilter2" onChange={this.exludeFilter2} value={this.state.exludeFilter2} /></td>
                             <td><input name="exludeFilter3" onChange={this.exludeFilter3} value={this.state.exludeFilter3} /></td>
                             <td><input name="exludeFilter4" onChange={this.exludeFilter4} value={this.state.exludeFilter4} /></td>
-                            <td><Button onClick={this.exclude0Qty} > Exclude 0 Qty</Button></td>
+                            <td>
+                                <Button onClick={this.exclude0Qty} > Exclude 0 Qty</Button>
+                                <Button onClick={this.showOnlyLong} > Show Long</Button>
+                                <Button onClick={this.showOnlyShort} > Show Short</Button>
+                            </td>
+                            
                         </tr>
                     </tbody>
                 </Table>

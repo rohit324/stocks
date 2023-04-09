@@ -4,6 +4,7 @@ import Orders from './Orders';
 import Positions from './Positions';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
+import cookie from "react-cookie";
 class SASPositions extends React.Component {
 
     sell = (data) => {
@@ -28,6 +29,8 @@ class SASPositions extends React.Component {
                 this.props.rerenderParentCallback();
             });
     }
+
+   
 
     buy = (data) => {
         const order = Orders.getSampleOrder;
@@ -98,7 +101,7 @@ class SASPositions extends React.Component {
             <td>{Positions.getCurrentValue(data[index])}</td>
             <td>{data[index].ltp}</td>
             <td>{Positions.getPNL(data[index])}</td>
-            <td>Comments</td>
+            <td><input name="comments" onChange={this.comments} value={this.state.filter2} /></td>
             <td>{Positions.getBuyPrice(data[index])}</td>
             <td>{Positions.getSellPrice(data[index])}</td>
             <td><Button name={data[index].token} onClick={this.deleteRow} variant="outline-danger" size='sm'> Delete</Button></td>
