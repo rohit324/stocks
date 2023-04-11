@@ -6,7 +6,7 @@ import Positions from './Positions';
 import SamplePositions from './SamplePositions';
 class SASSearch extends React.Component {
 
-    
+
 
     state = {
         filter: '',
@@ -97,12 +97,12 @@ class SASSearch extends React.Component {
     };
 
     showOnlyLong = (event) => {
-        SASConstants.currentPositionsData = Positions.getLongPositions(SASConstants.currentPositionsData);
+        SASConstants.currentPositionsData = Positions.getLongPositions(SASConstants.fetchedData);
         this.props.rerenderParentCallback();
     };
 
     showOnlyShort = (event) => {
-        SASConstants.currentPositionsData = Positions.getShortPositions(SASConstants.currentPositionsData);
+        SASConstants.currentPositionsData = Positions.getShortPositions(SASConstants.fetchedData);
         this.props.rerenderParentCallback();
     };
 
@@ -123,9 +123,9 @@ class SASSearch extends React.Component {
     saveAccessToken = (event) => {
         SASConstants.accessToken = event.target.value;
         const state = this.getCurrentState();
-        state.accessToken = event.target.value;      
-        this.setState(state);  
-        this.props.rerenderParentCallback();    
+        state.accessToken = event.target.value;
+        this.setState(state);
+        this.props.rerenderParentCallback();
     }
 
     displayProjectedPNL = (event) => {
@@ -214,7 +214,7 @@ class SASSearch extends React.Component {
                     <tbody>
                         <tr>
                             <td>Access Token</td>
-                            <td colSpan={8}><textarea name="accessToken" style={{width:'100%'}} onChange={this.saveAccessToken} value={this.state.accessToken} /></td>
+                            <td colSpan={8}><textarea name="accessToken" style={{ width: '100%' }} onChange={this.saveAccessToken} value={this.state.accessToken} /></td>
                         </tr>
                     </tbody>
                 </Table>
@@ -229,10 +229,14 @@ class SASSearch extends React.Component {
                             <td><input name="exludeFilter4" onChange={this.exludeFilter4} value={this.state.exludeFilter4} /></td>
                             <td>
                                 <Button onClick={this.exclude0Qty} > Exclude 0 Qty</Button>
+                            </td>
+                            <td>
                                 <Button onClick={this.showOnlyLong} > Show Long</Button>
+                            </td>
+                            <td>
                                 <Button onClick={this.showOnlyShort} > Show Short</Button>
                             </td>
-                            
+
                         </tr>
                     </tbody>
                 </Table>
